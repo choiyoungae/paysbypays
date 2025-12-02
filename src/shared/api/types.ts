@@ -1,7 +1,7 @@
 type PayType = "ONLINE" | "DEVICE" | "MOBILE" | "VACT" | "BILLING";
 type PaymentStatus = "PENDING" | "SUCCESS" | "FAILED" | "CANCELLED";
 
-interface PaymentListRes {
+export interface PaymentListRes {
     paymentCode: string;
     mchtCode: string;
     amount: string;
