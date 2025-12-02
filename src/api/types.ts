@@ -1,5 +1,5 @@
-type PayType = "ONLINE" | "DEVICE" | "MOBILE" | "VACT" | "BILLING";
-type PaymentStatus = "PENDING" | "SUCCESS" | "FAILED" | "CANCELLED";
+export type PayType = "ONLINE" | "DEVICE" | "MOBILE" | "VACT" | "BILLING";
+export type PaymentStatus = "PENDING" | "SUCCESS" | "FAILED" | "CANCELLED";
 
 export interface PaymentListRes {
     paymentCode: string;
@@ -11,7 +11,7 @@ export interface PaymentListRes {
     paymentAt: string;
 }
 
-interface ApiResponseListPaymentListRes {
+export interface ApiResponseListPaymentListRes {
     status: number;
     message: string;
     data: PaymentListRes[];

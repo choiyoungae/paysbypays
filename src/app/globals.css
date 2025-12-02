@@ -188,7 +188,13 @@
     cursor: pointer;
   }
   body {
-    @apply relative font-normal font-outfit z-1 bg-gray-50;
+    @apply relative font-normal font-outfit z-1 bg-gray-50 dark:text-white/90;
+  }
+}
+
+@layer utilities {
+  .placeholder-theme {
+    @apply placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:border-white/5;
   }
 }
 
