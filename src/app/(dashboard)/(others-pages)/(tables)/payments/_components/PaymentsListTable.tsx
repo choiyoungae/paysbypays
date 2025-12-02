@@ -7,18 +7,33 @@ import {
 } from "@/components/ui/table";
 
 import Badge from "@/components/ui/badge/Badge";
-import type { PaymentListRes } from "@/shared/api/types";
+import type { PaymentListRes, PaymentStatus } from "@/api/types";
 
 type PaymentsListTableProps = {
   data: PaymentListRes[];
 };
 
 export default function PaymentsListTable({ data }: PaymentsListTableProps) {
+  function getStatusBadgeColor(status: PaymentStatus) {
+    switch (status) {
+      case "SUCCESS":
+        return "success";
+      case "PENDING":
+        return "warning";
+      case "FAILED":
+        return "error";
+      case "CANCELLED":
+        return "light";
+      default:
+        return "primary";
+    }
+  }
+
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3">
       <div className="max-w-full overflow-x-auto">
         <div className="min-w-[1102px]">
-          <Table>
+          <Table className="table-fixed w-full">
             {/* Table Header */}
             <TableHeader className="border-b border-gray-100 dark:border-white/5">
               <TableRow>
@@ -51,16 +66,7 @@ export default function PaymentsListTable({ data }: PaymentsListTableProps) {
 
                   {/* 상태 */}
                   <TableCell className="px-5 py-4 text-center">
-                    <Badge
-                      size="sm"
-                      color={
-                        item.status === "SUCCESS"
-                          ? "success"
-                          : item.status === "FAILED"
-                            ? "error"
-                            : "warning"
-                      }
-                    >
+                    <Badge size="sm" color={getStatusBadgeColor(item.status)}>
                       {item.status}
                     </Badge>
                   </TableCell>
