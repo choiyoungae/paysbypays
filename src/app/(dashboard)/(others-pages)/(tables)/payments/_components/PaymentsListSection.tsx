@@ -4,18 +4,64 @@ import { usePayments } from "@/hooks/usePayments";
 import PaymentsListTable from "./PaymentsListTable";
 import { PaymentListRes, PaymentStatus, PayType } from "@/api/types";
 import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 type StatusFilter = PaymentStatus | "ALL";
 type PayTypeFilter = PayType | "ALL";
 
+const STATUS_OPTIONS: StatusFilter[] = [
+    "ALL",
+    "PENDING",
+    "SUCCESS",
+    "FAILED",
+    "CANCELLED",
+];
+
 export default function PaymentsListSection() {
     const { data = [], isLoading, isError } = usePayments();
 
-    const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const pathname = usePathname();
+
+    // 🔹 URL 의 status 값을 보고 초기값 결정
+    const statusFromQuery = searchParams.get("status");
+    const initialStatus: StatusFilter = STATUS_OPTIONS.includes(
+        statusFromQuery as StatusFilter
+    )
+        ? (statusFromQuery as StatusFilter)
+        : "ALL";
+
+    const [statusFilter, setStatusFilter] = useState<StatusFilter>(initialStatus);
     const [payTypeFilter, setPayTypeFilter] = useState<PayTypeFilter>("ALL");
     const [search, setSearch] = useState("");
     const [page, setPage] = useState(1);
     const pageSize = 10;
+
+    useEffect(() => {
+        const q = searchParams.get("status");
+        const next: StatusFilter = STATUS_OPTIONS.includes(q as StatusFilter)
+            ? (q as StatusFilter)
+            : "ALL";
+        setStatusFilter(next);
+    }, [searchParams]);
+
+    const updateStatusInUrl = (nextStatus: StatusFilter) => {
+        const params = new URLSearchParams(searchParams.toString());
+
+        if (nextStatus === "ALL") {
+            params.delete("status");
+        } else {
+            params.set("status", nextStatus);
+        }
+
+        params.delete("page");
+
+        const queryString = params.toString();
+        const target = queryString ? `${pathname}?${queryString}` : pathname;
+
+        router.push(target, { scroll: false });
+    };
 
     const filtered: PaymentListRes[] = useMemo(() => {
         return data.filter((p) => {
@@ -55,7 +101,11 @@ export default function PaymentsListSection() {
                 <select
                     className="rounded border px-2 py-1 text-sm dark:border-white/5"
                     value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
+                    onChange={(e) => {
+                        const next = e.target.value as StatusFilter
+                        setStatusFilter(next)
+                        updateStatusInUrl(next)
+                    }}
                 >
                     <option value="ALL">전체 상태</option>
                     <option value="PENDING">대기</option>
