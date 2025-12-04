@@ -17,20 +17,20 @@ export interface ApiResponseListPaymentListRes {
     data: PaymentListRes[];
 }
 
-interface MerchantListRes {
+export interface MerchantListRes {
     mchtCode: string;
     mchtName: string;
     status: string;
     bizType: string;
 }
 
-interface ApiResponseListMerchantListRes {
+export interface ApiResponseListMerchantListRes {
     status: number;
     message: string;
     data: MerchantListRes[];
 }
 
-interface MerchantDetailRes {
+export interface MerchantDetailRes {
     mchtCode: string;
     mchtName: string;
     status: string;
@@ -43,35 +43,35 @@ interface MerchantDetailRes {
     updatedAt: string;
 }
 
-interface ApiResponseMerchantDetailRes {
+export interface ApiResponseMerchantDetailRes {
     status: number;
     message: string;
     data: MerchantDetailRes;
 }
 
-interface ApiResponseListMerchantDetailRes {
+export interface ApiResponseListMerchantDetailRes {
     status: number;
     message: string;
     data: MerchantDetailRes[];
 }
 
-interface StatusRes {
+export interface StatusRes {
     code: string;
     description: string;
 }
 
-interface ApiResponseListStatusRes {
+export interface ApiResponseListStatusRes {
     status: number;
     message: string;
     data: StatusRes[];
 }
 
-interface PayTypeRes {
+export interface PayTypeRes {
     type: string;
     description: string;
 }
 
-interface ApiResponseListPayTypeRes {
+export interface ApiResponseListPayTypeRes {
     status: number;
     message: string;
     data: PayTypeRes[];

@@ -58,7 +58,7 @@ export default function PaymentsListTable({ data }: PaymentsListTableProps) {
 
                   {/* 금액 */}
                   <TableCell className="px-5 py-4 text-right">
-                    {Number(item.amount).toLocaleString()}원
+                    {Number(item.amount).toLocaleString()} {item.currency}
                   </TableCell>
 
                   {/* 결제수단 */}
