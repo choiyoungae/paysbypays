@@ -2,20 +2,126 @@
 
 import { usePayments } from "@/hooks/usePayments";
 import PaymentsListTable from "./PaymentsListTable";
-import { PaymentListRes, PaymentStatus, PayType } from "@/api/types";
+import { PaymentListRes, PaymentStatus, PayType, PayTypeLabelMap, StatusLabelMap } from "@/api/types";
 import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePaymentStatusCodes, usePaymentTypeCodes } from "@/hooks/useCommonApis";
 
 type StatusFilter = PaymentStatus | "ALL";
 type PayTypeFilter = PayType | "ALL";
 
+const STATUS_OPTIONS: StatusFilter[] = [
+    "ALL",
+    "PENDING",
+    "SUCCESS",
+    "FAILED",
+    "CANCELLED",
+];
+
+const PAYTYPE_OPTIONS: PayTypeFilter[] = [
+    "ALL",
+    "ONLINE",
+    "DEVICE",
+    "MOBILE",
+    "VACT",
+    "BILLING",
+];
+
 export default function PaymentsListSection() {
     const { data = [], isLoading, isError } = usePayments();
+    const { data: statusCodes = [] } = usePaymentStatusCodes();
+    const { data: typeCodes = [] } = usePaymentTypeCodes();
 
-    const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
-    const [payTypeFilter, setPayTypeFilter] = useState<PayTypeFilter>("ALL");
+    const statusMap = useMemo<StatusLabelMap>(() => {
+        const map: StatusLabelMap = {};
+        statusCodes.forEach((item) => {
+            map[item.code as PaymentStatus] = item.description;
+        });
+        return map;
+    }, [statusCodes]);
+
+    const typeMap = useMemo<PayTypeLabelMap>(() => {
+        const map: PayTypeLabelMap = {};
+        typeCodes.forEach((item) => {
+            map[item.type as PayType] = item.description;
+        });
+        return map;
+    }, [typeCodes]);
+
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const pathname = usePathname();
+
+    const statusFromQuery = searchParams.get("status");
+    const initialStatus: StatusFilter = STATUS_OPTIONS.includes(
+        statusFromQuery as StatusFilter
+    )
+        ? (statusFromQuery as StatusFilter)
+        : "ALL";
+
+    const payTypeFromQuery = searchParams.get("payType");
+    const initialPayType: PayTypeFilter = PAYTYPE_OPTIONS.includes(
+        payTypeFromQuery as PayTypeFilter
+    )
+        ? (payTypeFromQuery as PayTypeFilter)
+        : "ALL";
+
+    const [statusFilter, setStatusFilter] = useState<StatusFilter>(initialStatus);
+    const [payTypeFilter, setPayTypeFilter] = useState<PayTypeFilter>(initialPayType);
     const [search, setSearch] = useState("");
     const [page, setPage] = useState(1);
     const pageSize = 10;
+
+    useEffect(() => {
+        const q = searchParams.get("status");
+        const next: StatusFilter = STATUS_OPTIONS.includes(q as StatusFilter)
+            ? (q as StatusFilter)
+            : "ALL";
+        setStatusFilter(next);
+    }, [searchParams]);
+
+    useEffect(() => {
+        const q = searchParams.get("payType");
+        const next: PayTypeFilter = PAYTYPE_OPTIONS.includes(q as PayTypeFilter)
+            ? (q as PayTypeFilter)
+            : "ALL";
+        setPayTypeFilter(next);
+    }, [searchParams]);
+
+    const updateStatusInUrl = (nextStatus: StatusFilter) => {
+        const params = new URLSearchParams(searchParams.toString());
+
+        if (nextStatus === "ALL") {
+            params.delete("status");
+        } else {
+            params.set("status", nextStatus);
+        }
+
+        params.delete("page");
+
+        const queryString = params.toString();
+        const target = queryString ? `${pathname}?${queryString}` : pathname;
+
+        router.push(target, { scroll: false });
+    };
+
+    const updatePayTypeInUrl = (nextPayType: PayTypeFilter) => {
+        const params = new URLSearchParams(searchParams.toString());
+
+        if (nextPayType === "ALL") {
+            params.delete("payType");
+        } else {
+            params.set("payType", nextPayType);
+        }
+
+        params.delete("page"); // 필터 바꾸면 페이지 1로
+
+        const queryString = params.toString();
+        const target = queryString ? `${pathname}?${queryString}` : pathname;
+
+        router.push(target, { scroll: false });
+    };
+
 
     const filtered: PaymentListRes[] = useMemo(() => {
         return data.filter((p) => {
@@ -55,27 +161,35 @@ export default function PaymentsListSection() {
                 <select
                     className="rounded border px-2 py-1 text-sm dark:border-white/5"
                     value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
+                    onChange={(e) => {
+                        const next = e.target.value as StatusFilter
+                        setStatusFilter(next)
+                        updateStatusInUrl(next)
+                    }}
                 >
                     <option value="ALL">전체 상태</option>
-                    <option value="PENDING">대기</option>
-                    <option value="SUCCESS">성공</option>
-                    <option value="FAILED">실패</option>
-                    <option value="CANCELLED">취소</option>
+                    <option value="PENDING">{statusMap.PENDING ?? "결제 대기"}</option>
+                    <option value="SUCCESS">{statusMap.SUCCESS ?? "결제 완료"}</option>
+                    <option value="FAILED">{statusMap.FAILED ?? "결제 실패"}</option>
+                    <option value="CANCELLED">{statusMap.CANCELLED ?? "환불 완료"}</option>
                 </select>
 
                 {/* 결제수단 필터 */}
                 <select
                     className="rounded border px-2 py-1 text-sm dark:border-white/5"
                     value={payTypeFilter}
-                    onChange={(e) => setPayTypeFilter(e.target.value as PayTypeFilter)}
+                    onChange={(e) => {
+                        const next = e.target.value as PayTypeFilter
+                        setPayTypeFilter(next)
+                        updatePayTypeInUrl(next)
+                    }}
                 >
                     <option value="ALL">전체 수단</option>
-                    <option value="ONLINE">ONLINE</option>
-                    <option value="DEVICE">DEVICE</option>
-                    <option value="MOBILE">MOBILE</option>
-                    <option value="VACT">VACT</option>
-                    <option value="BILLING">BILLING</option>
+                    <option value="ONLINE">{typeMap.ONLINE ?? "온라인"}</option>
+                    <option value="DEVICE">{typeMap.DEVICE ?? "단말기"}</option>
+                    <option value="MOBILE">{typeMap.MOBILE ?? "모바일"}</option>
+                    <option value="VACT">{typeMap.VACT ?? "가상계좌"}</option>
+                    <option value="BILLING">{typeMap.BILLING ?? "정기결제"}</option>
                 </select>
 
                 <input
@@ -86,7 +200,11 @@ export default function PaymentsListSection() {
                 />
             </div>
 
-            <PaymentsListTable data={pagedData} />
+            <PaymentsListTable
+                data={pagedData}
+                statusMap={statusMap}
+                typeMap={typeMap}
+            />
 
             <div className="flex items-center justify-end gap-2 text-sm">
                 <span className="text-gray-500">

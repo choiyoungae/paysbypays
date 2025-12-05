@@ -15,9 +15,12 @@ import {
     computeMerchantSales,
     computeHourlySales,
 } from "../_lib/dashboardStats";
+import { usePaymentTypeCodes } from "@/hooks/useCommonApis";
+import { PayType, PayTypeLabelMap } from "@/api/types";
 
 export default function DashboardClient() {
     const { data: payments = [], isLoading, isError } = usePayments();
+    const { data: typeCodes = [], isLoading: isLoadingTypeCodes } = usePaymentTypeCodes();
 
     const {
         totalSales,
@@ -27,6 +30,15 @@ export default function DashboardClient() {
         totalCount,
         merchantCount,
     } = useMemo(() => computeKpi(payments), [payments]);
+
+    const typeMap = useMemo<PayTypeLabelMap>(() => {
+        const map: PayTypeLabelMap = {};
+        typeCodes.forEach((item) => {
+            const key = item.type as PayType
+            map[key] = item.description;
+        });
+        return map;
+    }, [typeCodes]);
 
     const paymentTypeStats = useMemo(
         () => computeByPayType(payments),
@@ -68,7 +80,7 @@ export default function DashboardClient() {
         });
     }, [payments, currencies]);
 
-    if (isLoading) return <div>대시보드를 불러오는 중...</div>;
+    if (isLoading || isLoadingTypeCodes) return <div>대시보드를 불러오는 중...</div>;
     if (isError) return <div>대시보드 데이터를 불러오지 못했습니다.</div>;
 
     return (
@@ -85,7 +97,7 @@ export default function DashboardClient() {
 
             {/* Row 2: 도넛 + 바 차트 */}
             <div className="grid gap-6 lg:grid-cols-2">
-                <DashboardPaymentTypeDonut stats={paymentTypeStats} />
+                <DashboardPaymentTypeDonut stats={paymentTypeStats} typeMap={typeMap} />
                 <DashboardMerchantBar data={merchantSales} />
             </div>
 
