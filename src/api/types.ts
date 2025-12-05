@@ -76,3 +76,9 @@ export interface ApiResponseListPayTypeRes {
     message: string;
     data: PayTypeRes[];
 }
+
+// 상태 코드 → 라벨(설명)
+export type StatusLabelMap = Partial<Record<PaymentStatus, string>>;
+
+// 결제수단 코드 → 라벨(설명)
+export type PayTypeLabelMap = Partial<Record<PayType, string>>;

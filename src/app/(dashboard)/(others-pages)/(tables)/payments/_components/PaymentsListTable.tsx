@@ -7,13 +7,15 @@ import {
 } from "@/components/ui/table";
 
 import Badge from "@/components/ui/badge/Badge";
-import type { PaymentListRes, PaymentStatus } from "@/api/types";
+import type { PaymentListRes, PaymentStatus, PayTypeLabelMap, StatusLabelMap } from "@/api/types";
 
 type PaymentsListTableProps = {
   data: PaymentListRes[];
+  statusMap: StatusLabelMap;
+  typeMap: PayTypeLabelMap;
 };
 
-export default function PaymentsListTable({ data }: PaymentsListTableProps) {
+export default function PaymentsListTable({ data, statusMap, typeMap }: PaymentsListTableProps) {
   function getStatusBadgeColor(status: PaymentStatus) {
     switch (status) {
       case "SUCCESS":
@@ -62,12 +64,12 @@ export default function PaymentsListTable({ data }: PaymentsListTableProps) {
                   </TableCell>
 
                   {/* 결제수단 */}
-                  <TableCell className="px-5 py-4 text-center">{item.payType}</TableCell>
+                  <TableCell className="px-5 py-4 text-center">{typeMap[item.payType] ?? item.payType}</TableCell>
 
                   {/* 상태 */}
                   <TableCell className="px-5 py-4 text-center">
                     <Badge size="sm" color={getStatusBadgeColor(item.status)}>
-                      {item.status}
+                      {statusMap[item.status] ?? item.status}
                     </Badge>
                   </TableCell>
 
