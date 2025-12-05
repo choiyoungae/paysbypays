@@ -23,6 +23,7 @@ const MERCHANT_STATUS_OPTIONS: MerchantStatusFilter[] = [
 export default function MerchantsListSection() {
     const { data = [], isLoading, isError } = useMerchants();
     const { data: statusCodes = [] } = useMerchantStatusCodes();
+    const [selectedMerchant, setSelectedMerchant] = useState<MerchantDetailRes | null>(null);
 
     const merchantStatusMap = useMemo<MerchantStatusLabelMap>(() => {
         const map: MerchantStatusLabelMap = {};
@@ -193,7 +194,10 @@ export default function MerchantsListSection() {
                 />
             </div>
 
-            <MerchantsListTable data={pagedData} />
+            <MerchantsListTable 
+                data={pagedData} 
+                onRowClick={(merchant) => setSelectedMerchant(merchant)} 
+            />
 
             <div className="flex items-center justify-end gap-2 text-sm">
                 <span className="text-gray-500">
@@ -214,6 +218,59 @@ export default function MerchantsListSection() {
                     다음
                 </button>
             </div>
+            {selectedMerchant && (
+                <div
+                    className="fixed inset-0 z-100 flex items-center justify-center bg-black/40"
+                    onClick={() => setSelectedMerchant(null)}
+                >
+                    <div
+                        className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="mb-4">
+                            <h2 className="text-lg font-semibold">
+                                {selectedMerchant.mchtName}
+                            </h2>
+                            <p className="text-sm text-gray-500">
+                                {selectedMerchant.mchtCode}
+                            </p>
+                        </div>
+
+                        <div className="space-y-2 text-sm">
+                            <p>
+                                <span className="font-medium">주소: </span>
+                                {selectedMerchant.address}
+                            </p>
+                            <p>
+                                <span className="font-medium">전화번호: </span>
+                                {selectedMerchant.phone}
+                            </p>
+                            <p>
+                                <span className="font-medium">이메일: </span>
+                                {selectedMerchant.email}
+                            </p>
+                            <p>
+                                <span className="font-medium">등록일: </span>
+                                {selectedMerchant.registeredAt?.slice(0, 10)}
+                            </p>
+                            <p>
+                                <span className="font-medium">업데이트일: </span>
+                                {selectedMerchant.updatedAt?.slice(0, 10)}
+                            </p>
+                        </div>
+
+                        <div className="mt-6 flex justify-end">
+                            <button
+                                className="rounded border px-3 py-1 text-sm"
+                                onClick={() => setSelectedMerchant(null)}
+                            >
+                                닫기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 }
