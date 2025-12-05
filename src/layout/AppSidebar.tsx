@@ -42,7 +42,10 @@ const navItems: NavItem[] = [
   {
     name: "Tables",
     icon: <TableIcon />,
-    subItems: [{ name: "payments", path: "/payments", pro: false }],
+    subItems: [
+      { name: "payments", path: "/payments", pro: false },
+      { name: "merchants", path: "/merchants", pro: false }
+    ],
   },
   {
     name: "Pages",
