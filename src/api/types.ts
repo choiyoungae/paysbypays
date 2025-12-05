@@ -1,5 +1,6 @@
 export type PayType = "ONLINE" | "DEVICE" | "MOBILE" | "VACT" | "BILLING";
 export type PaymentStatus = "PENDING" | "SUCCESS" | "FAILED" | "CANCELLED";
+export type MerchantStatus = "READY" | "ACTIVE" | "INACTIVE" | "CLOSED";
 
 export interface PaymentListRes {
     paymentCode: string;
@@ -46,7 +47,7 @@ export interface MerchantDetailRes {
 export interface ApiResponseMerchantDetailRes {
     status: number;
     message: string;
-    data: MerchantDetailRes;
+    data: MerchantDetailRes[];
 }
 
 export interface ApiResponseListMerchantDetailRes {
